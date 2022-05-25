@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cc.mapper.EmpMapper">
+    <resultMap id="empResultMap" type="com.cc.entity.Emp">
+        <id property="id" column="emp_id"></id>
+        <result property="name" column="emp_name"></result>
+        <result property="dept.id" column="dept_id"></result>
+        <result property="dept.name" column="dept_name"></result>
+        <result property="gender" column="gender"></result>
+        <result property="status" column="status"></result>
+
+    </resultMap>
+    <insert id="insert" parameterType="com.cc.entity.Emp">
+        INSERT INTO t_emp(name,gender,dept_id,status)
+        VALUES (#{name},#{gender},#{dept.id},#{status})
+
+    </insert>
+    <update id="update">
+        UPDATE t_emp
+        SET name = #{name},gender=#{gender},status=#{status},dept_id=${dept.id}
+        where id=#{id}
+    </update>
+    <delete id="deleteById">
+        DELETE FROM t_emp
+        WHERE id=#{id}
+    </delete>
+    <select id="queryAll" resultMap="empResultMap">
+        SELECT e.id as emp_id ,e.name as emp_name,e.gender,e.status,d.id as dept_id ,d.name as dept_name
+        FROM t_emp e,t_dept d
+        where e.dept_id = d.id
+    </select>
+    <select id="getById" resultMap="empResultMap" parameterType="int">
+        SELECT e.id as emp_id ,e.name as emp_name,e.gender,e.status,d.id as dept_id ,d.name as dept_name
+        FROM t_emp e,t_dept d
+        where e.dept_id = d.id AND e.id=#{id}
+    </select>
+</mapper>

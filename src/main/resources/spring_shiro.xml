@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--    配置加密匹配器-->
+    <bean id="credentialsMatcher" class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+        <property name="hashAlgorithmName" value="MD5"></property>
+        <property name="hashIterations" value="1024"></property>
+    </bean>
+
+    <!--    配置realm-->
+    <bean id="userRealm" class="com.cc.realm.UserRealm">
+        <property name="credentialsMatcher" ref="credentialsMatcher"></property>
+    </bean>
+    <!--    配置securityManager-->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="userRealm"></property>
+        <!--配置缓存管理器-->
+        <property name="cacheManager" ref="cacheManager"/>
+    </bean>
+
+
+    <!--配置生命周期的后置处理器 作用是调用IOC容器中的shiro bean的生命周期方法-->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"></bean>
+    <!--启用IOC容器中的使用shiro的注解 但必须在配置了LifecycleBeanPostProcessor之后才能使用-->
+<!--    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+          depends-on="lifecycleBeanPostProcessor"/>-->
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>
+
+    <!--配置缓存-->
+    <bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <property name="cacheManagerConfigFile" value="classpath:ehcache.xml"/>
+    </bean>
+
+    <!--    告诉shiro的拦截规则-->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"></property>
+        <!--        告诉shiro登录地址-->
+        <property name="loginUrl" value="/index.html"></property>
+
+        <!--        配置哪些资源该拦截-->
+        <property name="filterChainDefinitions">
+            <value>
+                /index.html=anon
+                /asserts/**=anon
+                /login=anon
+                /logout=logout
+                /**=authc
+
+            </value>
+        </property>
+    </bean>
+
+</beans>
